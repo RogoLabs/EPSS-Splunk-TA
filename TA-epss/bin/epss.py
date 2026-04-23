@@ -10,12 +10,6 @@ if __name__ == "__main__" and "--scheme" in sys.argv:
     <streaming_mode>xml</streaming_mode>
     <endpoint>
         <args>
-            <arg name="index">
-                <title>Index</title>
-                <description>Splunk index for EPSS events</description>
-                <required_on_create>false</required_on_create>
-                <data_type>string</data_type>
-            </arg>
             <arg name="lookback_days">
                 <title>Lookback Days</title>
                 <description>Days of historical data to backfill on first run</description>
@@ -74,12 +68,6 @@ class EPSSInput(Script):
         scheme.use_external_validation = False
         scheme.streaming_mode = Scheme.streaming_mode_xml
         scheme.use_single_instance = False
-
-        arg = Argument("index")
-        arg.title = "Index"
-        arg.data_type = Argument.data_type_string
-        arg.required_on_create = False
-        scheme.add_argument(arg)
 
         arg = Argument("lookback_days")
         arg.title = "Lookback Days"

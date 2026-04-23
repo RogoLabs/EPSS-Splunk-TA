@@ -32,7 +32,7 @@ def test_scheme_title_matches_input_stanza():
 
 
 def test_scheme_has_required_args():
-    """Scheme must have index, lookback_days, batch_size, epss_base_url args."""
+    """Scheme must have lookback_days, batch_size, epss_base_url args."""
     result = subprocess.run(
         [sys.executable, EPSS_PY, "--scheme"],
         capture_output=True,
@@ -41,7 +41,6 @@ def test_scheme_has_required_args():
     root = ET.fromstring(result.stdout)
     args = root.findall(".//arg")
     arg_names = {arg.get("name") for arg in args}
-    assert "index" in arg_names
     assert "lookback_days" in arg_names
     assert "batch_size" in arg_names
     assert "epss_base_url" in arg_names
