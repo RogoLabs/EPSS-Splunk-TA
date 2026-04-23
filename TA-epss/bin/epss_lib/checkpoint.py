@@ -73,8 +73,14 @@ class CheckpointManager:
 
         if self.service is not None:
             try:
+                import json
+
                 collection = self.service.kvstore[COLLECTION_NAME]
-                collection.data.update(CHECKPOINT_KEY, self._checkpoint)
+                body = json.dumps(self._checkpoint)
+                try:
+                    collection.data.update(CHECKPOINT_KEY, body)
+                except Exception:
+                    collection.data.insert(body)
             except Exception as e:
                 self.logger.error(f"Failed to save checkpoint: {e}")
 
