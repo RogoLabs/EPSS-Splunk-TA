@@ -1,0 +1,4 @@
+<nav>
+    <view name="epss_overview" default="true" />
+    <view name="epss_health" />
+</nav>

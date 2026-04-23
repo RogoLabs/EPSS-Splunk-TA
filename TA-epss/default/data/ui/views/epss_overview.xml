@@ -1,0 +1,217 @@
+<dashboard version="2">
+    <label>EPSS Overview</label>
+    <description>Daily EPSS score analytics and CVE risk assessment</description>
+    <definition><![CDATA[
+{
+    "dataSources": {
+        "ds_coverage_stats": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-1d@d latest=now | stats dc(cve_id) as total_cves avg(epss_score) as mean_score values(model_version) as model_version | eval mean_score=round(mean_score, 5)"
+            }
+        },
+        "ds_critical_count": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-1d@d latest=now | where percentile>=0.99 | stats count as critical_count"
+            }
+        },
+        "ds_risk_tiers": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-1d@d latest=now | stats count by epss_risk_tier | sort epss_risk_tier"
+            }
+        },
+        "ds_top50": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-1d@d latest=now | sort -epss_score | head 50 | table cve_id epss_score percentile epss_risk_tier score_date model_version"
+            }
+        },
+        "ds_movers": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-2d@d latest=now | stats latest(epss_score) as current_score earliest(epss_score) as prev_score latest(model_version) as current_model earliest(model_version) as prev_model latest(percentile) as percentile by cve_id | where current_model=prev_model | eval change=round(current_score-prev_score, 5) | where abs(change)>0.001 | sort -abs(change) | head 50 | table cve_id current_score prev_score change percentile"
+            }
+        },
+        "ds_trend": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score cve_id=\"$cve_lookup$\" earliest=-30d@d latest=now | timechart span=1d latest(epss_score) as epss_score by model_version"
+            }
+        }
+    },
+    "inputs": {
+        "input_cve": {
+            "type": "input.text",
+            "options": {
+                "token": "cve_lookup",
+                "defaultValue": "CVE-2021-44228"
+            },
+            "title": "CVE ID Lookup"
+        }
+    },
+    "visualizations": {
+        "viz_total_cves": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_coverage_stats"
+            },
+            "title": "Total CVEs Scored",
+            "options": {
+                "majorValue": "> primary | seriesByName('total_cves')"
+            }
+        },
+        "viz_mean_score": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_coverage_stats"
+            },
+            "title": "Mean EPSS Score",
+            "options": {
+                "majorValue": "> primary | seriesByName('mean_score')"
+            }
+        },
+        "viz_critical_count": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_critical_count"
+            },
+            "title": "Critical Tier (>=99th pct)",
+            "options": {
+                "majorValue": "> primary | seriesByName('critical_count')",
+                "majorColor": "#dc4e41"
+            }
+        },
+        "viz_model_version": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_coverage_stats"
+            },
+            "title": "Model Version",
+            "options": {
+                "majorValue": "> primary | seriesByName('model_version')"
+            }
+        },
+        "viz_risk_tiers": {
+            "type": "splunk.bar",
+            "dataSources": {
+                "primary": "ds_risk_tiers"
+            },
+            "title": "Risk Tier Distribution"
+        },
+        "viz_top50": {
+            "type": "splunk.table",
+            "dataSources": {
+                "primary": "ds_top50"
+            },
+            "title": "Top 50 Highest EPSS Scores"
+        },
+        "viz_movers": {
+            "type": "splunk.table",
+            "dataSources": {
+                "primary": "ds_movers"
+            },
+            "title": "Biggest Daily Score Changes (Same Model)"
+        },
+        "viz_trend": {
+            "type": "splunk.line",
+            "dataSources": {
+                "primary": "ds_trend"
+            },
+            "title": "EPSS Score Trend"
+        }
+    },
+    "layout": {
+        "type": "grid",
+        "options": {
+            "width": 1440
+        },
+        "structure": [
+            {
+                "item": "viz_total_cves",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_mean_score",
+                "type": "block",
+                "position": {
+                    "x": 360,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_critical_count",
+                "type": "block",
+                "position": {
+                    "x": 720,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_model_version",
+                "type": "block",
+                "position": {
+                    "x": 1080,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_risk_tiers",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 120,
+                    "w": 720,
+                    "h": 300
+                }
+            },
+            {
+                "item": "viz_top50",
+                "type": "block",
+                "position": {
+                    "x": 720,
+                    "y": 120,
+                    "w": 720,
+                    "h": 300
+                }
+            },
+            {
+                "item": "viz_movers",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 420,
+                    "w": 720,
+                    "h": 300
+                }
+            },
+            {
+                "item": "viz_trend",
+                "type": "block",
+                "position": {
+                    "x": 720,
+                    "y": 420,
+                    "w": 720,
+                    "h": 300
+                }
+            }
+        ]
+    },
+    "title": "EPSS Overview",
+    "description": "Daily EPSS score analytics and CVE risk assessment"
+}
+    ]]></definition>
+</dashboard>

@@ -1,0 +1,245 @@
+<dashboard version="2">
+    <label>EPSS Health</label>
+    <description>TA-epss operational status and diagnostics</description>
+    <definition><![CDATA[
+{
+    "dataSources": {
+        "ds_last_ingest": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=ingest_complete earliest=-7d@d latest=now | sort -_time | head 1 | eval last_ingest=strftime(_time, \"%Y-%m-%d %H:%M:%S\") | table last_ingest"
+            }
+        },
+        "ds_records_today": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=ingest_complete earliest=-1d@d latest=now | stats sum(records_ingested) as records_today"
+            }
+        },
+        "ds_records_total": {
+            "type": "ds.search",
+            "options": {
+                "query": "| inputlookup epss_current_lookup | stats count as total_records"
+            }
+        },
+        "ds_error_count": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=error earliest=-24h@h latest=now | stats count as error_count"
+            }
+        },
+        "ds_daily_timeline": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=ingest_complete earliest=-30d@d latest=now | timechart span=1d sum(records_ingested) as records"
+            }
+        },
+        "ds_audit_events": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit earliest=-7d@d latest=now | sort -_time | head 20 | table _time action score_date records_ingested duration_seconds http_status"
+            }
+        },
+        "ds_errors_table": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=error earliest=-7d@d latest=now | sort -_time | table _time score_date error"
+            }
+        },
+        "ds_model_versions": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:score earliest=-90d@d latest=now | stats earliest(_time) as first_seen latest(_time) as last_seen dc(cve_id) as cve_count by model_version | eval first_seen=strftime(first_seen, \"%Y-%m-%d\") | eval last_seen=strftime(last_seen, \"%Y-%m-%d\") | sort -first_seen | table model_version first_seen last_seen cve_count"
+            }
+        },
+        "ds_source_availability": {
+            "type": "ds.search",
+            "options": {
+                "query": "`epss_index` sourcetype=epss:audit action=download_complete earliest=-1d@d latest=now | sort -_time | head 1 | table http_status duration_seconds file_size_bytes"
+            }
+        }
+    },
+    "visualizations": {
+        "viz_last_ingest": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_last_ingest"
+            },
+            "title": "Last Successful Ingest",
+            "options": {
+                "majorValue": "> primary | seriesByName('last_ingest')"
+            }
+        },
+        "viz_records_today": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_records_today"
+            },
+            "title": "Records Ingested Today",
+            "options": {
+                "majorValue": "> primary | seriesByName('records_today')"
+            }
+        },
+        "viz_records_total": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_records_total"
+            },
+            "title": "Total Records in Lookup",
+            "options": {
+                "majorValue": "> primary | seriesByName('total_records')"
+            }
+        },
+        "viz_error_count": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_error_count"
+            },
+            "title": "Errors (24h)",
+            "options": {
+                "majorValue": "> primary | seriesByName('error_count')",
+                "majorColor": "#dc4e41"
+            }
+        },
+        "viz_daily_timeline": {
+            "type": "splunk.column",
+            "dataSources": {
+                "primary": "ds_daily_timeline"
+            },
+            "title": "Daily Ingestion Volume (30 Days)"
+        },
+        "viz_audit_events": {
+            "type": "splunk.table",
+            "dataSources": {
+                "primary": "ds_audit_events"
+            },
+            "title": "Recent Audit Events"
+        },
+        "viz_errors_table": {
+            "type": "splunk.table",
+            "dataSources": {
+                "primary": "ds_errors_table"
+            },
+            "title": "Error Log"
+        },
+        "viz_model_versions": {
+            "type": "splunk.table",
+            "dataSources": {
+                "primary": "ds_model_versions"
+            },
+            "title": "Model Version History"
+        },
+        "viz_source_availability": {
+            "type": "splunk.singlevalue",
+            "dataSources": {
+                "primary": "ds_source_availability"
+            },
+            "title": "Source Availability",
+            "options": {
+                "majorValue": "> primary | seriesByName('http_status')"
+            }
+        }
+    },
+    "layout": {
+        "type": "grid",
+        "options": {
+            "width": 1440
+        },
+        "structure": [
+            {
+                "item": "viz_last_ingest",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_records_today",
+                "type": "block",
+                "position": {
+                    "x": 360,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_records_total",
+                "type": "block",
+                "position": {
+                    "x": 720,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_error_count",
+                "type": "block",
+                "position": {
+                    "x": 1080,
+                    "y": 0,
+                    "w": 360,
+                    "h": 120
+                }
+            },
+            {
+                "item": "viz_daily_timeline",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 120,
+                    "w": 1440,
+                    "h": 250
+                }
+            },
+            {
+                "item": "viz_audit_events",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 370,
+                    "w": 1440,
+                    "h": 250
+                }
+            },
+            {
+                "item": "viz_errors_table",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 620,
+                    "w": 720,
+                    "h": 200
+                }
+            },
+            {
+                "item": "viz_model_versions",
+                "type": "block",
+                "position": {
+                    "x": 720,
+                    "y": 620,
+                    "w": 720,
+                    "h": 200
+                }
+            },
+            {
+                "item": "viz_source_availability",
+                "type": "block",
+                "position": {
+                    "x": 0,
+                    "y": 820,
+                    "w": 1440,
+                    "h": 120
+                }
+            }
+        ]
+    },
+    "title": "EPSS Health",
+    "description": "TA-epss operational status and diagnostics"
+}
+    ]]></definition>
+</dashboard>
