@@ -19,7 +19,7 @@
         "ds_records_total": {
             "type": "ds.search",
             "options": {
-                "query": "| inputlookup epss_current_lookup | stats count as total_records"
+                "query": "`epss_index` sourcetype=epss:score earliest=-1d@d latest=now | stats dc(cve_id) as total_records"
             }
         },
         "ds_error_count": {
@@ -85,7 +85,7 @@
             "dataSources": {
                 "primary": "ds_records_total"
             },
-            "title": "Total Records in Lookup",
+            "title": "Unique CVEs (Latest Day)",
             "options": {
                 "majorValue": "> primary | seriesByName('total_records')"
             }
