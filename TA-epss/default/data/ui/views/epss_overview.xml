@@ -37,7 +37,7 @@
         "ds_trend": {
             "type": "ds.search",
             "options": {
-                "query": "`epss_index` sourcetype=epss:score cve_id=\"$cve_lookup$\" earliest=-30d@d latest=now | timechart span=1d latest(epss_score) as epss_score by model_version"
+                "query": "`epss_index` sourcetype=epss:score cve_id=\"$cve_lookup$\" earliest=-30d@d latest=now | timechart span=1d latest(epss_score) as epss_score latest(percentile) as percentile"
             }
         }
     },
