@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "EPSS Scores for Splunk",
+    "id": {
+      "group": null,
+      "name": "TA-epss",
+      "version": "1.0.0"
+    },
+    "author": [
+      {
+        "name": "Jerry Gamblin"
+      }
+    ],
+    "releaseDate": null,
+    "description": "Ingests daily EPSS (Exploit Prediction Scoring System) scores from FIRST",
+    "classification": {
+      "intendedAudience": "Security",
+      "categories": ["Security, Fraud & Compliance"],
+      "developmentStatus": "Production/Stable"
+    },
+    "commonInformationModels": {
+      "Vulnerabilities": ">=5.0.0"
+    },
+    "license": {
+      "name": "MIT",
+      "text": "LICENSE",
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": "README",
+      "text": "README.md",
+      "uri": null
+    }
+  },
+  "dependencies": null,
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": ["_standalone", "_distributed", "_search_head_clustering"],
+  "targetWorkloads": ["_search_heads"]
+}
