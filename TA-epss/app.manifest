@@ -25,24 +25,18 @@
     "license": {
       "name": "MIT",
       "text": "LICENSE",
-      "uri": null
-    },
-    "privacyPolicy": {
-      "name": null,
-      "text": null,
-      "uri": null
-    },
-    "releaseNotes": {
-      "name": "README",
-      "text": "README.md",
-      "uri": null
+      "uri": "https://opensource.org/licenses/MIT"
     }
   },
-  "dependencies": null,
-  "tasks": null,
-  "inputGroups": null,
-  "incompatibleApps": null,
-  "platformRequirements": null,
+  "dependencies": {},
+  "tasks": [],
+  "inputGroups": {},
+  "incompatibleApps": {},
+  "platformRequirements": {
+    "splunk": {
+      "Enterprise": "*"
+    }
+  },
   "supportedDeployments": ["_standalone", "_distributed", "_search_head_clustering"],
-  "targetWorkloads": ["_search_heads"]
+  "targetWorkloads": ["_search_heads", "_indexers"]
 }
