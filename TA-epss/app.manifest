@@ -23,9 +23,9 @@
       "Vulnerabilities": ">=5.0.0"
     },
     "license": {
-      "name": "MIT",
+      "name": "Apache-2.0",
       "text": "LICENSE",
-      "uri": "https://opensource.org/licenses/MIT"
+      "uri": "https://www.apache.org/licenses/LICENSE-2.0"
     }
   },
   "dependencies": {},
