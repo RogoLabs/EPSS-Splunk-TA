@@ -17,7 +17,7 @@ epss_base_url = <string>
 * Base URL for EPSS CSV file downloads
 * Default: https://epss.empiricalsecurity.com
 
-interval = <cron expression or seconds>
-* How often to run the input
-* Recommended: cron expression targeting late afternoon UTC (after ~14:00 UTC publish time)
-* Default: 0 18 * * *
+interval = <integer or cron expression>
+* How often to run the input in seconds, or a cron expression for fixed scheduling
+* Numeric interval runs immediately on install/restart, then repeats
+* Default: 86400 (24 hours)
